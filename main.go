@@ -38,12 +38,12 @@ func parse(kubeconfig, filename string, dryrun bool) {
 		log.Fatal(err)
 	}
 
-	cfg, err := kubernetes.NewForConfig(kubecfg)
+	clientset, err := kubernetes.NewForConfig(kubecfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dynamicCfg, err := dynamic.NewForConfig(kubecfg)
+	dynamicClient, err := dynamic.NewForConfig(kubecfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func parse(kubeconfig, filename string, dryrun bool) {
 			Object: unstructuredMap,
 		}
 
-		groupRes, err := restmapper.GetAPIGroupResources(cfg.Discovery())
+		groupRes, err := restmapper.GetAPIGroupResources(clientset.Discovery())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,9 +82,9 @@ func parse(kubeconfig, filename string, dryrun bool) {
 			if unstructuredObj.GetNamespace() == "" {
 				unstructuredObj.SetNamespace("default")
 			}
-			dri = dynamicCfg.Resource(mapping.Resource).Namespace(unstructuredObj.GetNamespace())
+			dri = dynamicClient.Resource(mapping.Resource).Namespace(unstructuredObj.GetNamespace())
 		} else {
-			dri = dynamicCfg.Resource(mapping.Resource)
+			dri = dynamicClient.Resource(mapping.Resource)
 		}
 
 		if dryrun {
